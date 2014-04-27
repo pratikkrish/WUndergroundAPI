@@ -98,7 +98,7 @@ function callMe(urlforzipcode,city_number,callback) {
 			//weather
 			var weather = parsed_json.current_observation.weather;
 			  
-			//temperature in farenheit
+			//temperature in fahrenheit
 			var temp = parsed_json.current_observation.temp_f;
 	   		$('#temperature'+city_number).text(temp +" °F");
 	      
