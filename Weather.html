@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Current weather report</title>
+<style>
+#heading
+{	text-align:center;
+	font-size:2em;
+	font-weight:bold;
+	color:#8B008B
+}
+#city
+{
+	text-align:center;
+	width:100%;
+}
+.cities
+{
+	display:inline-block;
+	width:25%;
+}
+.cityname
+{
+	color:#C71585;
+	font-weight:bold;
+	font-size:large;
+}
+.weather
+{
+	 color:#3A5FCD;
+	 font-size:medium;
+	 font-weight:bold;
+}
+.temperature
+{
+	color:#6495ED;
+	font-weight:bold;
+}
+#temp_diff
+{
+	 text-align:center;
+	 font-size:medium;
+	 font-weight:bold;
+	 color:#00CD00;
+}
+</style>
+</head>
+<body>
+<div id="main">
+	<br/>
+	<div id="heading"></div>
+	<br/><br/>
+	<div id="city">
+		<div id="city1" class="cities" >
+			<div id="city1name" class="cityname"></div>
+			<div id="city1img"></div>
+			<div id="weather1" class="weather"></div>
+			<div id="temperature1" class="temperature"></div>
+		</div>
+		<div id="city2" class="cities">
+			<div id="city2name" class="cityname"></div>
+			<div id="city2img"></div>
+			<div id="weather2" class="weather"></div>
+			<div id="temperature2" class="temperature"></div>
+		</div>
+	</div>
+	<br/>
+	<div id="temp_diff"></div>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script>
+
+jQuery(document).ready(function() {
+	//AJAX call to the API URL for 2 cities based on zip code with callback functions returning the city and temperature for each request
+	//for city 1 - Corvallis, OR
+	callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/97330.json",1,function(c1,t1) {
+		//for city 2 - Portland, OR
+		callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/97201.json",2, function(c2,t2) {
+			document.getElementById("heading").innerHTML = "Comparison in temperatures of "+c1+" and "+c2;
+			//calculating the difference in the temperature
+			var diff = t1-t2;
+			//
+		    $('#temp_diff').text("Difference in temperatures: "+(Math.round(diff * 100) / 100)+" °F");
+		});
+	});
+});
+
+function callMe(urlforzipcode,city_number,callback) {
+	$.ajax({
+		url : urlforzipcode,
+		dataType : "jsonp",
+		success : function(parsed_json) {
+			  
+			//city name
+			var location = parsed_json.current_observation.display_location.full;
+		  
+			//weather
+			var weather = parsed_json.current_observation.weather;
+			  
+			//temperature in farenheit
+			var temp = parsed_json.current_observation.temp_f;
+	   		$('#temperature'+city_number).text(temp +" °F");
+	      
+			//Convert default URL (In retrieved JSON for ICON Set 10) to URL for Icon Set 9
+			var urlforicon9 = parsed_json.current_observation.icon_url.substr(0, 29) + "i" + parsed_json.current_observation.icon_url.substr(29+"i".length);
+			$('#city'+city_number+"img").append("<img src="+"\""+urlforicon9+"\"</img>");
+		  
+			$('#weather'+city_number).text(weather);
+		 
+			$('#city'+city_number+'name').text(location);
+		  
+			callback(location,temp);
+		}
+	});
+};
+
+</script>
+</body>
+</html>
