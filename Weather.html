@@ -7,7 +7,8 @@
 {	text-align:center;
 	font-size:2em;
 	font-weight:bold;
-	color:#8B008B
+	color:#8B008B;
+	padding:30px;
 }
 #city
 {
@@ -19,7 +20,31 @@
 	display:inline-block;
 	width:25%;
 }
+#zipinput
+{
+	text-align:center;
+	width:100%;
+	padding:30px;
+}
+.zipalign
+{
+	display:inline-block;
+	width:25%;
+}
+.row
+{
+	text-align:center;
+	width:100%;
+	padding:30px;
+    margin-bottom:100px;
+}
 .cityname
+{
+	color:#C71585;
+	font-weight:bold;
+	font-size:large;
+}
+.cell
 {
 	color:#C71585;
 	font-weight:bold;
@@ -46,72 +71,175 @@
 </style>
 </head>
 <body>
-<div id="main">
-	<br/>
-	<div id="heading"></div>
-	<br/><br/>
-	<div id="city">
-		<div id="city1" class="cities" >
-			<div id="city1name" class="cityname"></div>
-			<div id="city1img"></div>
-			<div id="weather1" class="weather"></div>
-			<div id="temperature1" class="temperature"></div>
+	<div id="heading">Please enter the zip codes of two US cities to
+		compare their weather conditions</div>
+	<div id="formdiv">
+		<form id="zipcodeform" method="post">
+			<div id="zipinput">
+				<div id="city1input" class="zipalign">
+					<label for="zipcode1" class="cell">Zip code 1:</label> <input
+						type="text" id="input1" name="input1">
+				</div>
+				<div id="city2input" class="zipalign">
+					<label for="zipcode2" class="cell">Zip code 2:</label> <input
+						type="text" id="input2" name="input2">
+				</div>
+			</div>
+			<div class="row">
+				<input type="submit" value="Submit">
+			</div>
+		</form>
+	</div>
+	<div id="main">
+		<div id="city">
+			<div id="city1" class="cities">
+				<div id="city1name" class="cityname"></div>
+				<div id="city1img"></div>
+				<div id="weather1" class="weather"></div>
+				<div id="temperature1" class="temperature"></div>
+			</div>
+			<div id="city2" class="cities">
+				<div id="city2name" class="cityname"></div>
+				<div id="city2img"></div>
+				<div id="weather2" class="weather"></div>
+				<div id="temperature2" class="temperature"></div>
+			</div>
 		</div>
-		<div id="city2" class="cities">
-			<div id="city2name" class="cityname"></div>
-			<div id="city2img"></div>
-			<div id="weather2" class="weather"></div>
-			<div id="temperature2" class="temperature"></div>
+		<div id="temp_diff"></div>
+		<div class="row">
+			<input type="button" value="Go back" id="backbutton"
+				style="visibility: hidden;">
 		</div>
 	</div>
-	<br/>
-	<div id="temp_diff"></div>
-</div>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-<script>
+	<script
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+	<script src="http://jquery.bassistance.de/validate/jquery.validate.js"></script>
+	<script
+		src="http://jquery.bassistance.de/validate/additional-methods.js"></script>
 
-jQuery(document).ready(function() {
-	//AJAX call to the API URL for 2 cities based on zip code with callback functions returning the city and temperature for each request
-	//for city 1 - Corvallis, OR
-	callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/97330.json",1,function(c1,t1) {
-		//for city 2 - Portland, OR
-		callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/97201.json",2, function(c2,t2) {
-			document.getElementById("heading").innerHTML = "Comparison in temperatures of "+c1+" and "+c2;
-			//calculating the difference in the temperature
-			var diff = t1-t2;
-			//
-		    $('#temp_diff').text("Difference in temperatures: "+(Math.round(diff * 100) / 100)+" °F");
-		});
-	});
+	<script>
+
+//what to do on submit
+$.validator.setDefaults({
+	submitHandler: displayWeather
 });
 
+//custom method to validate zip code - US only
+$.validator.addMethod("zipcode", function(value, element) {
+	return this.optional(element) || /^\d{5}(?:-\d{4})?$/.test(value);
+}, "Invalid zipcode");
+	
+//rules for validation	
+$("#zipcodeform").validate({
+	rules : {
+		input1 : {
+			required : true,
+			zipcode : true
+		},
+		input2 : {
+			required : true,
+			zipcode : true
+		}
+	}
+});
+
+//back button functionality
+$("#backbutton").click(function(){
+	location.reload(true);
+});
+
+//The below function gets called on submit. It contains the logic for displaying the weather
+function displayWeather() {
+	$("#heading").hide();
+	$("#formdiv").hide();
+	
+	//retrieving value of 1st zip code entered by the user
+	var zipcode1 = $("#input1").val();
+	
+	//retrieving value of 2nd zip code entered by the user
+	var zipcode2 = $("#input2").val();
+	
+	//AJAX calls to the API URL for 2 cities based on zip code with callback functions returning the city and temperature for each request
+	
+	//for city 1
+	callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/"+zipcode1+".json",1,function(c1,t1) {
+		
+		//for city 2
+		callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/"+zipcode2+".json",2, function(c2,t2) {
+			document.getElementById("heading").innerHTML = "Comparison in temperatures of "+c1+" and "+c2;
+			$("#heading").show();
+			//now we are sure that both the zip codes are valid and hence we show the weather for both the cities
+			$('#city').show();
+			//calculating the difference in the temperature
+			var diff = t1-t2;
+			//Rounding off the temperature to two digits after decimal
+		    $('#temp_diff').text("Difference in temperatures: "+(Math.round(diff * 100) / 100)+" °F");
+			
+			//make the back button visible for navigation
+		    $("#backbutton").css('visibility', 'visible');
+		});
+	});
+};
+
+//function to call the API and retrieve the relevant values from the JSON
+//called for both zip codes
 function callMe(urlforzipcode,city_number,callback) {
 	$.ajax({
 		url : urlforzipcode,
 		dataType : "jsonp",
 		success : function(parsed_json) {
-			  
-			//city name
-			var location = parsed_json.current_observation.display_location.full;
-		  
-			//weather
-			var weather = parsed_json.current_observation.weather;
-			  
-			//temperature in fahrenheit
-			var temp = parsed_json.current_observation.temp_f;
-	   		$('#temperature'+city_number).text(temp +" °F");
+			//to ensure that the URL does not return a JSON without any current observation because of invalid zip code
+			if(parsed_json.hasOwnProperty('current_observation')==true) {
+				//city name
+				var location = parsed_json.current_observation.display_location.full;
+		  	
+				//weather
+				var weather = parsed_json.current_observation.weather;
+			
+				//temperature in fahrenheit
+				var temp = parsed_json.current_observation.temp_f;
+			
+				//to ensure that the details of the cities are hidden unless it is certain that both zip codes are valid
+				$('#city').hide();
+			
+	   			$('#temperature'+city_number).text(temp +" °F");
 	      
-			//Convert default URL (In retrieved JSON for ICON Set 10) to URL for Icon Set 9
-			var urlforicon9 = parsed_json.current_observation.icon_url.substr(0, 29) + "i" + parsed_json.current_observation.icon_url.substr(29+"i".length);
-			$('#city'+city_number+"img").append("<img src="+"\""+urlforicon9+"\"</img>");
+				//Convert default URL (Retrieved JSON contains ICON Set 10) to URL for Icon Set 9
+				var urlforicon9 = parsed_json.current_observation.icon_url.substr(0, 29) + "i" + parsed_json.current_observation.icon_url.substr(29+"i".length);
+			
+				$('#city'+city_number+"img").append("<img src="+"\""+urlforicon9+"\"</img>");
 		  
-			$('#weather'+city_number).text(weather);
+				$('#weather'+city_number).text(weather);
 		 
-			$('#city'+city_number+'name').text(location);
+				$('#city'+city_number+'name').text(location);
 		  
-			callback(location,temp);
-		}
+				callback(location,temp);
+				}
+				else {
+					document.getElementById("heading").innerHTML = "The zip codes you provided are not valid. Please go back and provide valid zip codes.";
+					$("#heading").show();
+					$("#backbutton").css('visibility', 'visible');
+				}
+		},
+		//handling AJAX errors
+		error : function(jqXHR, exception) {
+            if (jqXHR.status === 0) {
+                alert('Not connect.\n Verify Network.');
+            } else if (jqXHR.status == 404) {
+                alert('Requested page not found. [404]');
+            } else if (jqXHR.status == 500) {
+                alert('Internal Server Error [500].');
+            } else if (exception === 'parsererror') {
+                alert('Requested JSON parse failed.');
+            } else if (exception === 'timeout') {
+                alert('Time out error.');
+            } else if (exception === 'abort') {
+                alert('Ajax request aborted.');
+            } else {
+                alert('Uncaught Error.\n' + jqXHR.responseText);
+            }
+        }
 	});
 };
 
