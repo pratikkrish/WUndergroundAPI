@@ -206,8 +206,7 @@ function callMe(urlforzipcode,city_number,callback) {
 	   			$('#temperature'+city_number).text(temp +" °F");
 	      
 				//Convert default URL (Retrieved JSON contains ICON Set 10) to URL for Icon Set 9
-				var urlforicon9 = parsed_json.current_observation.icon_url.substr(0, 29) + "i" + parsed_json.current_observation.icon_url.substr(29+"i".length);
-			
+				var urlforicon9 = parsed_json.current_observation.icon_url.substr(0, 26) + "i" + parsed_json.current_observation.icon_url.substr(26+"i".length);
 				$('#city'+city_number+"img").append("<img src="+"\""+urlforicon9+"\"</img>");
 		  
 				$('#weather'+city_number).text(weather);
