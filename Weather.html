@@ -162,11 +162,11 @@ function displayWeather() {
 	
 	//AJAX calls to the API URL for 2 cities based on zip code with callback functions returning the city and temperature for each request
 	
-	//for city 1
-	callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/"+zipcode1+".json",1,function(c1,t1) {
+	//for city 1 - add api key in the commented section of the URL
+	callMe("http://api.wunderground.com/api/<!--api key -->/conditions/q/"+zipcode1+".json",1,function(c1,t1) {
 		
-		//for city 2
-		callMe("http://api.wunderground.com/api/625172310aff38a6/conditions/q/"+zipcode2+".json",2, function(c2,t2) {
+		//for city 2 - add api key in the commented section of the URL
+		callMe("http://api.wunderground.com/api/<!--api key -->/conditions/q/"+zipcode2+".json",2, function(c2,t2) {
 			document.getElementById("heading").innerHTML = "Comparison in temperatures of "+c1+" and "+c2;
 			$("#heading").show();
 			//now we are sure that both the zip codes are valid and hence we show the weather for both the cities
